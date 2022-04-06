@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+</head>
+<body>
+    <ul id="messages"></ul>
+    <form action="" id="form">
+        <input type="text" id="input" autocomplete="off" placeholder="Write some message">
+        <button>Send</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io()
+        const messages = document.getElementById('messages')
+        const form = document.getElementById('form')
+        const input = document.getElementById('input')
+        const userID = Date.now()
+
+        let name = prompt('What is your username')
+
+        form.onsubmit = (e) => {
+            e.preventDefault()
+            if(input.value){
+                socket.emit('newuser' , name)
+                socket.emit('chat message' , {
+                    name: name,
+                    msg: input.value,
+                    user: userID
+                })
+                input.value = ''
+            }
+        }
+
+        socket.on('chat message' , msgObject => {
+            const message = document.createElement('li')
+            const messageItem = document.createElement('span')
+            // เอาข้อความจาก msgObject ไปใส่ใน span
+            messageItem.textContent = `${msgObject.name}:${msgObject.msg}`
+            // เช็คถ้าเป็นตัวเราส่งข้อความจะให้แสดงด้านขวา ถ้าคนอื่นส่งจะให้แสดงด้านซ้าย
+            if(msgObject.user === userID){
+                message.classList.add('right')
+            }
+            message.appendChild(messageItem)
+            messages.appendChild(message)
+        })
+
+    </script>
+</body>
+</html>
